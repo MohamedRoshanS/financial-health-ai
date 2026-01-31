@@ -1,0 +1,4 @@
+date,revenue,expense_category,expense_amount,receivable,payable,inventory,loan_emi,gst_paid,gst_due
+2024-01-01,450000,Marketing,40000,120000,80000,200000,15000,18000,0
+2024-02-01,480000,Salaries,150000,110000,90000,210000,15000,19000,0
+2024-03-01,420000,Operations,90000,140000,100000,220000,15000,0,20000
