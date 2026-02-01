@@ -1,5 +1,5 @@
 const API_BASE =
-  import.meta.env.REACT_APP_API_BASE || "http://127.0.0.1:8000";
+  import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000";
 
 export const uploadFile = async (file) => {
   const formData = new FormData();
@@ -14,17 +14,17 @@ export const uploadFile = async (file) => {
   return res.json();
 };
 
-export const analyzeData = async (monthlyData, industry) => {
+export const analyzeData = async (monthlyData, industry, gstData = null) => {
   const res = await fetch(`${API_BASE}/analyze`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       monthly_data: monthlyData,
-      industry
+      industry,
+      gst_data: gstData
     })
   });
 
   if (!res.ok) throw new Error("Analysis failed");
   return res.json();
 };
-

@@ -15,23 +15,54 @@ COLUMN_MAP = {
 
 def normalize_data(df):
     warnings = []
-
-    df.columns = df.columns.str.lower()
+    
+    # Make sure we're working with a DataFrame
+    if not isinstance(df, pd.DataFrame):
+        df = pd.DataFrame(df)
+    
+    df.columns = df.columns.str.lower().str.strip()
     normalized = {}
-
+    
+    # First, try to find exact matches for our required columns
     for standard, variants in COLUMN_MAP.items():
+        column_found = False
+        
+        # Check variants
         for v in variants:
             if v in df.columns:
                 normalized[standard] = df[v]
+                column_found = True
                 break
-        else:
-            normalized[standard] = 0
-            warnings.append(f"Missing column: {standard}")
-
+        
+        # Check for approximate matches (for PDF data)
+        if not column_found:
+            for col in df.columns:
+                if any(variant in col for variant in variants):
+                    normalized[standard] = df[col]
+                    column_found = True
+                    break
+        
+        # If still not found, set to 0
+        if not column_found:
+            if standard == "date":
+                # Use current date if no date column
+                normalized[standard] = pd.Series([pd.Timestamp.now()])
+                warnings.append("Date column missing, using current date")
+            else:
+                normalized[standard] = 0
+                warnings.append(f"Missing column: {standard}")
+    
     clean_df = pd.DataFrame(normalized)
-
-    clean_df["date"] = pd.to_datetime(clean_df["date"]).dt.to_period("M")
-
+    
+    # Convert date to period
+    try:
+        clean_df["date"] = pd.to_datetime(clean_df["date"], errors='coerce')
+        clean_df["date"] = clean_df["date"].dt.to_period("M")
+    except:
+        clean_df["date"] = pd.Period.now('M')
+        warnings.append("Date conversion failed, using current month")
+    
+    # Group by month
     monthly_df = clean_df.groupby("date").sum(numeric_only=True).reset_index()
-
+    
     return monthly_df, warnings

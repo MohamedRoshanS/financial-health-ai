@@ -1,4 +1,4 @@
-BENCHMARKS = {
+INDUSTRY_BENCHMARKS = {
     "Retail": {
         "profit_margin": 0.22,
         "expense_ratio": 0.58,
@@ -6,18 +6,37 @@ BENCHMARKS = {
         "liquidity_ratio": 1.2
     },
     "Manufacturing": {
-        "profit_margin": 0.30,
-        "expense_ratio": 0.50,
-        "debt_ratio": 0.20,
+        "profit_margin": 0.18,
+        "expense_ratio": 0.62,
+        "debt_ratio": 0.25,
         "liquidity_ratio": 1.4
     },
     "Services": {
-        "profit_margin": 0.35,
-        "expense_ratio": 0.45,
+        "profit_margin": 0.30,
+        "expense_ratio": 0.50,
         "debt_ratio": 0.10,
-        "liquidity_ratio": 1.6
+        "liquidity_ratio": 1.3
+    },
+    "Agriculture": {
+        "profit_margin": 0.15,
+        "expense_ratio": 0.65,
+        "debt_ratio": 0.30,
+        "liquidity_ratio": 1.1
+    },
+    "Logistics": {
+        "profit_margin": 0.12,
+        "expense_ratio": 0.70,
+        "debt_ratio": 0.35,
+        "liquidity_ratio": 1.0
+    },
+    "E-commerce": {
+        "profit_margin": 0.20,
+        "expense_ratio": 0.60,
+        "debt_ratio": 0.18,
+        "liquidity_ratio": 1.25
     }
 }
+BENCHMARKS = INDUSTRY_BENCHMARKS
 def compute_business_metrics(df):
     total_revenue = df["revenue"].sum()
     total_expenses = df["expense_amount"].sum()
@@ -38,8 +57,9 @@ def compute_business_metrics(df):
         "liquidity_ratio": round(liquidity_ratio, 2)
     }
 def compare_with_benchmark(df, industry):
-    if industry not in BENCHMARKS:
-        return None
+    if industry not in INDUSTRY_BENCHMARKS:
+        raise ValueError("Unsupported industry")
+
 
     business = compute_business_metrics(df)
     benchmark = BENCHMARKS[industry]

@@ -14,6 +14,7 @@ export default function Dashboard() {
 
   const result = location.state?.analysis;
   const warnings = location.state?.warnings || [];
+  
 
   if (!result) {
     return (
@@ -35,7 +36,9 @@ export default function Dashboard() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">
 
-      {/* HEADER / SCORE */}
+      {/* ===================== */}
+      {/* FINANCIAL HEALTH SCORE */}
+      {/* ===================== */}
       <div className="card flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div>
           <h2 className="section-title">Financial Health Overview</h2>
@@ -54,7 +57,9 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* ===================== */}
       {/* SCORE BREAKDOWN */}
+      {/* ===================== */}
       <div className="card">
         <h3 className="card-title mb-4 flex items-center gap-2">
           <Activity size={18} />
@@ -76,7 +81,137 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ACTIONS */}
+      {/* ===================== */}
+      {/* WORKING CAPITAL (GAP 3) */}
+      {/* ===================== */}
+      {result.working_capital && (
+        <div className="card">
+          <h3 className="card-title mb-4">
+            Working Capital Optimization
+          </h3>
+
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+            <div>
+              DSO: <b>{result.working_capital.dso} days</b>
+            </div>
+            <div>
+              DPO: <b>{result.working_capital.dpo} days</b>
+            </div>
+            <div>
+              CCC: <b>{result.working_capital.cash_conversion_cycle} days</b>
+            </div>
+            <div>
+              Risk:{" "}
+              <b
+                className={
+                  result.working_capital.risk_level === "High"
+                    ? "text-rose-600"
+                    : result.working_capital.risk_level === "Medium"
+                    ? "text-amber-600"
+                    : "text-emerald-600"
+                }
+              >
+                {result.working_capital.risk_level}
+              </b>
+            </div>
+          </div>
+
+          {result.working_capital.actions?.length > 0 && (
+            <ul className="list-disc list-inside text-sm text-gray-700">
+              {result.working_capital.actions.map((a, i) => (
+                <li key={i}>{a}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+      {/* BOOKKEEPING */}
+      {result.bookkeeping && (
+        <div className="card">
+          <h3 className="card-title mb-4">
+            Automated Bookkeeping Summary
+          </h3>
+
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+            {result.bookkeeping.ledger.map((row, i) => (
+              <div
+                key={i}
+                className="rounded-lg border border-gray-200 px-4 py-3"
+              >
+                <strong>{row.expense_category}</strong>
+                <div className="text-gray-600">
+                  ₹{row.expense_amount.toLocaleString()}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {result.bookkeeping.uncategorized_count > 0 && (
+            <p className="mt-4 text-xs text-amber-600">
+              {result.bookkeeping.uncategorized_count} transactions need manual review
+            </p>
+          )}
+        </div>
+      )}
+      {/* GST COMPLIANCE */}
+      {result.gst && (
+        <div className="card">
+          <h3 className="card-title mb-4">
+            GST Compliance Status
+          </h3>
+
+          <p className="text-sm">
+            <strong>Status:</strong>{" "}
+            <span
+              className={
+                result.gst.status === "Compliant"
+                  ? "text-emerald-600"
+                  : "text-rose-600"
+              }
+            >
+              {result.gst.status}
+            </span>
+          </p>
+
+          <p className="text-sm mt-2">
+            GST Paid: ₹{result.gst.gst_paid} <br />
+            GST Due: ₹{result.gst.gst_due}
+          </p>
+        </div>
+      )}
+      {/* BANK INTEGRATION */}
+      {result.bank_summary && (
+        <div className="card">
+          <h3 className="card-title mb-4">
+            Bank Account Activity
+          </h3>
+
+          <div className="grid sm:grid-cols-3 gap-4 text-sm">
+            <div>
+              <strong>Inflows</strong>
+              <div className="text-emerald-600">
+                ₹{result.bank_summary.inflows.toLocaleString()}
+              </div>
+            </div>
+
+            <div>
+              <strong>Outflows</strong>
+              <div className="text-rose-600">
+                ₹{result.bank_summary.outflows.toLocaleString()}
+              </div>
+            </div>
+
+            <div>
+              <strong>Transactions</strong>
+              <div>{result.bank_summary.transaction_count}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================== */}
+      {/* ACTION BUTTONS */}
+      {/* ===================== */}
       <div className="flex flex-wrap gap-4">
         <button
           onClick={() =>
@@ -99,7 +234,9 @@ export default function Dashboard() {
         </button>
       </div>
 
+      {/* ===================== */}
       {/* RISKS */}
+      {/* ===================== */}
       <div className="card">
         <h3 className="card-title mb-4 flex items-center gap-2">
           <AlertTriangle size={18} />
@@ -122,7 +259,9 @@ export default function Dashboard() {
         )}
       </div>
 
+      {/* ===================== */}
       {/* WARNINGS */}
+      {/* ===================== */}
       {warnings.length > 0 && (
         <div className="card">
           <h3 className="card-title mb-3 text-amber-600">
@@ -136,7 +275,9 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* ===================== */}
       {/* BENCHMARKS */}
+      {/* ===================== */}
       <div className="card">
         <h3 className="card-title mb-4 flex items-center gap-2">
           <TrendingUp size={18} />
@@ -173,7 +314,9 @@ export default function Dashboard() {
         </table>
       </div>
 
+      {/* ===================== */}
       {/* FORECAST */}
+      {/* ===================== */}
       <div className="card">
         <h3 className="card-title mb-4">Financial Forecast</h3>
 
