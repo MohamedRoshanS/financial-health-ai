@@ -6,7 +6,7 @@ from app.services.risk_engine import identify_risks
 from app.services.benchmarking import compare_with_benchmark
 from app.services.forecasting import generate_forecast
 from app.services.working_capital import compute_working_capital_metrics
-from app.services.bookkeeping import run_bookkeeping
+from app.services.bookkeeping import automated_bookkeeping
 from app.services.gst import analyze_gst
 from app.services.bank_adapter import fetch_bank_transactions
 from app.services.cashflow_enrichment import enrich_with_bank_data
@@ -39,7 +39,7 @@ def analyze_financials(payload: dict):
     # -----------------------------
     # 3. Sub-Services (Bookkeeping, GST)
     # -----------------------------
-    bookkeeping = run_bookkeeping(df)
+    bookkeeping = automated_bookkeeping(df)
 
     industry = payload.get("industry", "Retail")
     gst_payload = payload.get("gst_data")

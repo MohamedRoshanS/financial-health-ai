@@ -129,16 +129,17 @@ export default function Dashboard() {
       {result.bookkeeping && (
         <div className="card">
           <h3 className="card-title mb-4">
-            Automated Bookkeeping Summary
+            Automated Bookkeeping
           </h3>
+
+          <p className="text-sm mb-3">
+            Total Expenses: ₹{result.bookkeeping.summary.total_expenses.toLocaleString()}
+          </p>
 
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 text-sm">
             {result.bookkeeping.ledger.map((row, i) => (
-              <div
-                key={i}
-                className="rounded-lg border border-gray-200 px-4 py-3"
-              >
-                <strong>{row.expense_category}</strong>
+              <div key={i} className="border rounded px-4 py-3">
+                <strong>{row.account}</strong>
                 <div className="text-gray-600">
                   ₹{row.expense_amount.toLocaleString()}
                 </div>
@@ -146,13 +147,16 @@ export default function Dashboard() {
             ))}
           </div>
 
-          {result.bookkeeping.uncategorized_count > 0 && (
-            <p className="mt-4 text-xs text-amber-600">
-              {result.bookkeeping.uncategorized_count} transactions need manual review
-            </p>
+          {result.bookkeeping.issues.length > 0 && (
+            <ul className="mt-4 text-xs text-amber-600 list-disc list-inside">
+              {result.bookkeeping.issues.map((issue, i) => (
+                <li key={i}>{issue}</li>
+              ))}
+            </ul>
           )}
         </div>
       )}
+
       {/* GST COMPLIANCE */}
       {result.gst && (
         <div className="card">

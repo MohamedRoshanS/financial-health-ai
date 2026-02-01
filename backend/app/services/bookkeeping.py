@@ -1,66 +1,90 @@
 import pandas as pd
 
-# Simple enterprise-grade rule engine
-CATEGORY_RULES = {
-    "Rent": ["rent", "lease"],
-    "Salary": ["salary", "wages", "payroll"],
+# Minimal SME Chart of Accounts (India-friendly)
+CHART_OF_ACCOUNTS = {
+    "Rent & Lease": ["rent", "lease"],
+    "Salaries & Wages": ["salary", "wages", "payroll"],
     "Utilities": ["electricity", "water", "internet", "phone"],
-    "Marketing": ["ads", "advertising", "marketing", "promotion"],
-    "Logistics": ["transport", "shipping", "delivery", "freight"],
-    "Office Supplies": ["stationery", "office", "supplies"],
-    "Other": []
+    "Marketing & Advertising": ["ads", "advertising", "promotion"],
+    "Logistics & Transport": ["transport", "shipping", "delivery"],
+    "Office Expenses": ["stationery", "office"],
+    "Professional Fees": ["consulting", "legal", "audit"],
+    "Interest & Finance Charges": ["interest", "bank charge"],
 }
 
-def categorize_expense(description: str):
-    if not description:
-        return "Other", 0.3
+def categorize(description: str):
+    if not description or not isinstance(description, str):
+        return "Uncategorized", 0.4
 
-    desc = description.lower()
+    text = description.lower()
 
-    for category, keywords in CATEGORY_RULES.items():
-        for k in keywords:
-            if k in desc:
+    for category, keywords in CHART_OF_ACCOUNTS.items():
+        for kw in keywords:
+            if kw in text:
                 return category, 0.9
 
-    return "Other", 0.5
+    return "Uncategorized", 0.5
 
 
-def run_bookkeeping(monthly_df: pd.DataFrame):
+def automated_bookkeeping(df: pd.DataFrame):
     """
-    Adds:
-    - expense_category
-    - category_confidence
-    - monthly_ledger
+    Input: normalized monthly dataframe
+    Output:
+    - expense ledger
+    - monthly P&L summary
+    - bookkeeping quality signals
     """
 
-    df = monthly_df.copy()
+    df = df.copy()
 
-    # Ensure description column exists
+    # Ensure required columns
+    if "expense_amount" not in df.columns:
+        return {
+            "ledger": [],
+            "summary": {},
+            "issues": ["Expense data missing"]
+        }
+
+    # Optional description support
     if "description" not in df.columns:
         df["description"] = ""
 
     categories = []
-    confidences = []
+    confidence = []
 
     for desc in df["description"]:
-        cat, conf = categorize_expense(desc)
+        cat, conf = categorize(desc)
         categories.append(cat)
-        confidences.append(conf)
+        confidence.append(conf)
 
-    df["expense_category"] = categories
-    df["category_confidence"] = confidences
+    df["account"] = categories
+    df["confidence"] = confidence
 
-    # Monthly ledger summary
+    # Expense Ledger
     ledger = (
-        df.groupby("expense_category")["expense_amount"]
+        df.groupby("account")["expense_amount"]
         .sum()
         .reset_index()
         .sort_values(by="expense_amount", ascending=False)
     )
 
-    uncategorized_count = (df["expense_category"] == "Other").sum()
+    # P&L-style summary
+    total_expenses = df["expense_amount"].sum()
+    uncategorized = df[df["account"] == "Uncategorized"]["expense_amount"].sum()
+
+    summary = {
+        "total_expenses": float(total_expenses),
+        "uncategorized_ratio": round(
+            (uncategorized / total_expenses) if total_expenses else 0, 2
+        )
+    }
+
+    issues = []
+    if summary["uncategorized_ratio"] > 0.25:
+        issues.append("High proportion of uncategorized expenses")
 
     return {
         "ledger": ledger.to_dict(orient="records"),
-        "uncategorized_count": int(uncategorized_count)
+        "summary": summary,
+        "issues": issues
     }
